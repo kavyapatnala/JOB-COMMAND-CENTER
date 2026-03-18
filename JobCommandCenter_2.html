@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Job Command Center – Kavya Patnala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f1f3d;--navy2:#1a2f52;--gold:#c9a84c;--gold2:#e8c97a;
+  --cream:#f7f4ef;--white:#ffffff;--muted:#8b95a8;
+  --border:rgba(201,168,76,0.18);--green:#2d7a56;--red:#b84040;
+  --blue:#2a5298;--amber:#b87333;--pill:rgba(201,168,76,0.12);
+  --shadow:0 4px 28px rgba(15,31,61,0.11);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--navy);min-height:100vh}
+/* Layout */
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sidebar{background:var(--navy);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{padding:32px 36px;overflow-y:auto;max-height:100vh}
+/* Sidebar */
+.s-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.s-logo-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--gold);line-height:1.3}
+.s-logo-sub{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:3px}
+.s-section{padding:16px 20px 5px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.22)}
+.nav{display:flex;align-items:center;gap:9px;padding:10px 20px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.5);border-left:3px solid transparent;transition:all .15s;user-select:none}
+.nav:hover{color:var(--gold2);background:rgba(201,168,76,.07)}
+.nav.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.1);font-weight:500}
+.nav-icon{width:18px;text-align:center;font-size:14px}
+.nav-badge{margin-left:auto;background:var(--gold);color:var(--navy);border-radius:10px;font-size:10px;font-weight:600;padding:1px 7px}
+.s-foot{padding:14px 20px;border-top:1px solid rgba(255,255,255,.07);margin-top:auto;font-size:10px;color:rgba(255,255,255,.22);line-height:1.7}
+/* Pages */
+.page{display:none}.page.active{display:block}
+.page-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--navy)}
+.page-sub{font-size:12px;color:var(--muted);margin-top:4px;margin-bottom:22px}
+/* Cards */
+.card{background:var(--white);border-radius:14px;border:1px solid var(--border);padding:20px 22px;box-shadow:var(--shadow)}
+.card+.card,.card+.stats,.stats+.card{margin-top:18px}
+.card-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat{background:var(--white);border-radius:12px;padding:16px 18px;border:1px solid var(--border);box-shadow:var(--shadow)}
+.stat-n{font-family:'DM Serif Display',serif;font-size:30px;line-height:1}
+.stat-l{font-size:11px;color:var(--muted);margin-top:3px}
+.stat-s{font-size:11px;margin-top:5px;font-weight:500}
+.c-blue{color:var(--blue)}.c-green{color:var(--green)}.c-amber{color:var(--amber)}.c-muted{color:var(--muted)}
+/* Pipeline board */
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.col{background:rgba(15,31,61,.04);border-radius:12px;padding:12px;min-height:180px}
+.col-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.col-name{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.col-cnt{font-size:11px;background:var(--pill);color:var(--gold);border-radius:8px;padding:1px 7px;font-weight:600}
+.col-applied .col-name{color:var(--blue)}.col-screening .col-name{color:var(--amber)}
+.col-interview .col-name{color:var(--amber)}.col-offer .col-name{color:var(--green)}
+/* Job card */
+.jcard{background:var(--white);border-radius:10px;padding:11px 13px;border:1px solid var(--border);margin-bottom:9px;box-shadow:0 2px 8px rgba(15,31,61,.06);cursor:default;transition:transform .12s}
+.jcard:hover{transform:translateY(-1px)}
+.jcard-co{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-bottom:2px}
+.jcard-title{font-size:12px;font-weight:500;color:var(--navy);margin-bottom:5px;line-height:1.3}
+.jcard-meta{font-size:10px;color:var(--muted);display:flex;gap:7px}
+.jcard-note{font-size:10px;color:var(--muted);font-style:italic;margin-top:5px}
+.jcard-date{font-size:10px;color:var(--muted);margin-top:4px}
+.jcard-actions{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px}
+/* Status badges */
+.badge{display:inline-flex;align-items:center;font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+.b-applied{background:rgba(42,82,152,.1);color:var(--blue)}
+.b-screening{background:rgba(184,115,51,.1);color:var(--amber)}
+.b-interview{background:rgba(184,115,51,.15);color:var(--amber)}
+.b-offer{background:rgba(45,122,86,.12);color:var(--green)}
+.b-rejected{background:rgba(139,149,168,.12);color:var(--muted)}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;border:none;font-family:'DM Sans',sans-serif}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-gold{background:var(--gold);color:var(--navy);font-weight:600}
+.btn-gold:hover:not(:disabled){background:var(--gold2)}
+.btn-navy{background:var(--navy);color:var(--gold)}
+.btn-navy:hover:not(:disabled){background:var(--navy2)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--navy)}
+.btn-outline:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.btn-xs{padding:3px 8px;font-size:9px;border-radius:5px}
+.btn-sm{padding:6px 11px;font-size:11px}
+/* Input */
+.inp{width:100%;padding:9px 13px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--navy);background:var(--white);outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--gold)}
+.sel{appearance:none;background:var(--white)}
+textarea.inp{min-height:80px;resize:vertical}
+.lbl{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block}
+/* Grid helpers */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.flex{display:flex}.gap2{gap:8px}.gap3{gap:12px}.gap4{gap:16px}
+.mb2{margin-bottom:8px}.mb3{margin-bottom:12px}.mb4{margin-bottom:16px}.mb5{margin-bottom:20px}
+.mt3{margin-top:12px}.mt4{margin-top:16px}
+.row{display:flex;margin-bottom:12px}
+/* Email row */
+.erow{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:10px;padding:11px 15px;background:var(--white);border-radius:10px;border:1px solid var(--border);margin-bottom:8px;font-size:12px}
+.eco{font-weight:600;color:var(--navy);font-size:13px}
+.esub{color:var(--muted);font-size:11px;margin-top:1px}
+/* Job result */
+.jresult{padding:15px 17px;background:var(--white);border-radius:12px;border:1px solid var(--border);margin-bottom:10px;box-shadow:0 2px 8px rgba(15,31,61,.05)}
+.jres-title{font-size:14px;font-weight:600;color:var(--navy)}
+.jres-co{font-size:12px;color:var(--gold);font-weight:600;margin-top:1px}
+.jres-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-top:7px}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:10px;padding:3px 8px;border-radius:5px;background:var(--pill);color:var(--navy);font-weight:500}
+.match-high{color:var(--green);background:rgba(45,122,86,.1)}
+.match-medium{color:var(--amber);background:rgba(184,115,51,.1)}
+.match-low{color:var(--muted);background:rgba(139,149,168,.1)}
+/* Timeline */
+.tl{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:12px;padding-bottom:14px;position:relative}
+.tl-item::before{content:'';position:absolute;left:13px;top:26px;bottom:0;width:1px;background:var(--border)}
+.tl-item:last-child::before{display:none}
+.tl-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:1.5px solid var(--border);background:var(--white)}
+.tl-ev{font-size:12px;font-weight:500;color:var(--navy)}
+.tl-dt{font-size:10px;color:var(--muted);margin-top:2px}
+/* Progress bar */
+.pbar{height:5px;background:rgba(15,31,61,.08);border-radius:3px;overflow:hidden;margin-top:7px}
+.pfill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .5s}
+/* Modal overlay */
+.overlay{position:fixed;inset:0;background:rgba(15,31,61,.55);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(3px)}
+.modal{background:var(--white);border-radius:16px;padding:26px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(15,31,61,.25);max-height:90vh;overflow-y:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy)}
+.modal-x{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;font-family:sans-serif}
+/* Spinner */
+.spin{width:18px;height:18px;border:2px solid rgba(201,168,76,.3);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Loading */
+.loading-center{text-align:center;padding:40px}
+.loading-center .spin{width:30px;height:30px;margin:0 auto}
+.loading-center p{font-size:12px;color:var(--muted);margin-top:10px}
+/* Empty */
+.empty{text-align:center;padding:36px 20px;color:var(--muted)}
+.empty-icon{font-size:32px;margin-bottom:8px}
+.empty-text{font-size:12px}
+/* Error */
+.err{padding:11px 14px;background:rgba(184,64,64,.08);border-radius:8px;color:var(--red);font-size:12px;margin-bottom:14px}
+/* Resume header card */
+.res-header{background:var(--navy);border-radius:14px;border:1px solid rgba(201,168,76,.2);padding:22px 24px;margin-bottom:18px}
+.res-name{font-family:'DM Serif Display',serif;font-size:24px;color:var(--gold)}
+.res-role{font-size:13px;color:rgba(255,255,255,.6);margin-top:3px}
+.res-contact{font-size:11px;color:rgba(255,255,255,.38);margin-top:3px}
+.res-pill{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);border-radius:7px;padding:5px 11px;display:inline-block}
+.res-pill-l{font-size:9px;color:var(--gold);font-weight:600;letter-spacing:.07em;text-transform:uppercase}
+.res-pill-v{font-size:11px;color:rgba(255,255,255,.82);margin-top:1px}
+/* Skill pill */
+.skill-pill{padding:4px 11px;background:var(--navy);color:var(--gold);border-radius:20px;font-size:11px;font-weight:500;display:inline-block;margin:3px}
+/* Priority actions */
+.action-item{display:flex;align-items:center;gap:9px;padding:9px 11px;background:rgba(15,31,61,.03);border-radius:8px;border:1px solid var(--border);font-size:12px;margin-bottom:7px}
+/* Quick search btns */
+.qbtn{padding:9px 13px;background:var(--white);border:1px solid var(--border);border-radius:9px;cursor:pointer;text-align:left;font-family:'DM Sans',sans-serif;transition:all .15s;width:100%}
+.qbtn:hover{border-color:var(--gold)}
+.qbtn-title{font-size:12px;font-weight:600;color:var(--navy)}
+.qbtn-sub{font-size:10px;color:var(--muted);margin-top:2px}
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:3px}
+/* Responsive */
+@media(max-width:860px){.app{grid-template-columns:1fr}.sidebar{display:none}.stats{grid-template-columns:1fr 1fr}.board{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="s-logo">
+      <div class="s-logo-title">Job Search<br>Command Center</div>
+      <div class="s-logo-sub">Kavya Patnala · 2026</div>
+    </div>
+    <div class="s-section">Menu</div>
+    <div class="nav active" onclick="goto('dashboard')"><span class="nav-icon">⚡</span>Dashboard</div>
+    <div class="nav" onclick="goto('pipeline')"><span class="nav-icon">📋</span>Pipeline<span class="nav-badge" id="nb-active">5</span></div>
+    <div class="nav" onclick="goto('gmail')"><span class="nav-icon">📧</span>Gmail Scanner</div>
+    <div class="nav" onclick="goto('jobs')"><span class="nav-icon">🔍</span>Job Search</div>
+    <div class="nav" onclick="goto('linkedin')"><span class="nav-icon">🔗</span>LinkedIn Jobs</div>
+    <div class="nav" onclick="goto('resume')"><span class="nav-icon">📄</span>My Resume</div>
+    <div class="s-foot">Target: Analytics Manager<br>FinTech/Banking · Charlotte NC<br>$140K–$160K · Hybrid</div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── DASHBOARD ── -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-title">Good morning, Kavya 👋</div>
+      <div class="page-sub" id="today-date"></div>
+      <div class="stats" id="dash-stats"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-label">Pipeline Snapshot</div>
+          <div id="dash-snapshot"></div>
+        </div>
+        <div class="card">
+          <div class="card-label">🎯 Priority Actions</div>
+          <div class="action-item"><span>📞</span>U.S. Bank panel interview – Mar 21</div>
+          <div class="action-item"><span>📧</span>Follow up: Regions Bank (applied 5d ago)</div>
+          <div class="action-item"><span>🔍</span>Search new roles this week</div>
+          <div class="action-item"><span>📄</span>Tailor resume for Wells Fargo application</div>
+        </div>
+      </div>
+      <div class="card mt3">
+        <div class="card-label">Recent Applications</div>
+        <div id="dash-recent"></div>
+      </div>
+    </div>
+
+    <!-- ── PIPELINE ── -->
+    <div id="page-pipeline" class="page">
+      <div class="page-title">Application Pipeline</div>
+      <div class="page-sub">Track every application from first click to offer letter</div>
+      <div class="stats" id="pipe-stats"></div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div class="card-label" style="margin:0">Kanban Board</div>
+          <button class="btn btn-gold btn-sm" onclick="openAdd()">+ Add Application</button>
+        </div>
+        <div class="board" id="board"></div>
+        <div id="rejected-section" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <!-- ── GMAIL ── -->
+    <div id="page-gmail" class="page">
+      <div class="page-title">Gmail Scanner</div>
+      <div class="page-sub">Auto-detect job emails and sync to your pipeline</div>
+      <div class="card mb4">
+        <div class="card-label">Gmail Job Application Scanner</div>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">
+          Scans your Gmail for job application emails — confirmations, recruiter outreach, interview invites, and offers — and lets you import them directly into your pipeline.
+          <br><br>
+          <strong>To enable:</strong> In Claude.ai go to <strong>Settings → Connectors</strong> and make sure Gmail is connected. Then click Scan below.
+        </p>
+        <div class="flex gap3 mb3" style="flex-wrap:wrap;align-items:center">
+          <button class="btn btn-gold" id="scan-btn" onclick="scanGmail()">📧 Scan Gmail Now</button>
+          <span id="scan-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+        <div id="email-results"></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Recent Application Activity</div>
+        <div class="tl" id="activity-tl"></div>
+      </div>
+    </div>
+
+    <!-- ── JOB SEARCH ── -->
+    <div id="page-jobs" class="page">
+      <div class="page-title">Live Job Search</div>
+      <div class="page-sub">Real-time search powered by web results, pre-tuned to your profile</div>
+      <div class="card mb4">
+        <div class="card-label">Search Jobs</div>
+        <div class="flex gap3 mb3">
+          <input class="inp" id="search-q" value="Analytics Manager FinTech Banking Charlotte NC hybrid" placeholder="Search roles…" onkeydown="if(event.key==='Enter')doSearch()" style="flex:1"/>
+          <button class="btn btn-gold" onclick="doSearch()" id="search-btn">🔍 Search</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-outline btn-sm" onclick="quickSearch('Analytics Manager FinTech Banking Charlotte NC')">Analytics Mgr – FinTech Charlotte</button>
+          <button class="btn btn-outline btn-sm" onclick="quickSearch('Director of Analytics Banking hybrid Charlotte')">Director Analytics – Banking</button>
+          <button class="btn btn-outline btn-sm" onclick="quickSearch('Marketing Analytics Manager Charlotte NC hiring')">Marketing Analytics Mgr</button>
+          <button class="btn btn-outline btn-sm" onclick="quickSearch('Sr Business Intelligence Manager FinTech hybrid')">Sr BI Manager – FinTech</button>
+        </div>
+      </div>
+      <div id="search-results"></div>
+    </div>
+
+    <!-- ── LINKEDIN ── -->
+    <div id="page-linkedin" class="page">
+      <div class="page-title">LinkedIn Jobs</div>
+      <div class="page-sub">Current openings matched to your Analytics Manager profile — <a href="https://linkedin.com/in/kavyapatnala" target="_blank" style="color:var(--gold)">kavyapatnala ↗</a></div>
+      <div class="card mb4">
+        <div class="card-label">Search by Category</div>
+        <div class="grid2">
+          <button class="qbtn" onclick="linkedinSearch('Analytics Manager FinTech Charlotte NC hybrid 2026')"><div class="qbtn-title">Analytics Manager – FinTech Charlotte</div><div class="qbtn-sub">Your primary target · Charlotte area</div></button>
+          <button class="qbtn" onclick="linkedinSearch('Director Analytics Banking Charlotte NC 2026')"><div class="qbtn-title">Director of Analytics – Banking</div><div class="qbtn-sub">Director-track roles</div></button>
+          <button class="qbtn" onclick="linkedinSearch('Marketing Analytics Manager Charlotte NC 2026 hiring')"><div class="qbtn-title">Marketing Analytics Manager</div><div class="qbtn-sub">Your marketing analytics expertise</div></button>
+          <button class="qbtn" onclick="linkedinSearch('Senior Analytics Manager remote FinTech 2026')"><div class="qbtn-title">Sr Analytics Manager – Remote FinTech</div><div class="qbtn-sub">Remote-friendly roles</div></button>
+        </div>
+      </div>
+      <div id="li-results"></div>
+    </div>
+
+    <!-- ── RESUME ── -->
+    <div id="page-resume" class="page">
+      <div class="page-title">My Resume</div>
+      <div class="page-sub">Your profile at a glance — based on your uploaded resume</div>
+      <div class="res-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="res-name">Kavya Patnala</div>
+            <div class="res-role">Analytics Manager | FinTech & Banking</div>
+            <div class="res-contact">📍 Charlotte, NC &nbsp;·&nbsp; 📧 kavyapatnala@gmail.com &nbsp;·&nbsp; 📞 980-282-8672</div>
+          </div>
+          <div style="text-align:right">
+            <a href="https://linkedin.com/in/kavyapatnala" target="_blank" style="color:var(--gold);font-size:12px;text-decoration:none">🔗 linkedin.com/in/kavyapatnala</a>
+            <div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:3px">US Permanent Resident – No Sponsorship Needed</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <div class="res-pill"><div class="res-pill-l">Target</div><div class="res-pill-v">Analytics Manager → Director</div></div>
+          <div class="res-pill"><div class="res-pill-l">Industry</div><div class="res-pill-v">FinTech / Banking</div></div>
+          <div class="res-pill"><div class="res-pill-l">Salary</div><div class="res-pill-v">$140K – $160K</div></div>
+          <div class="res-pill"><div class="res-pill-l">Work Style</div><div class="res-pill-v">Hybrid preferred</div></div>
+        </div>
+      </div>
+      <div class="grid2 mb4">
+        <div class="card">
+          <div class="card-label">Experience</div>
+          <div class="tl">
+            <div class="tl-item"><div class="tl-dot">💼</div><div><div class="tl-ev"><strong>Truliant Federal Credit Union</strong></div><div style="font-size:12px;color:var(--navy);margin-top:1px">Business Insights Analyst – Strategic Decision Science</div><div class="tl-dt">Sep 2025 – Present</div></div></div>
+            <div class="tl-item"><div class="tl-dot">💼</div><div><div class="tl-ev"><strong>LendingTree</strong></div><div style="font-size:12px;color:var(--navy);margin-top:1px">Senior Data / Business Analyst</div><div class="tl-dt">Jul 2024 – Sep 2025</div></div></div>
+            <div class="tl-item"><div class="tl-dot">💼</div><div><div class="tl-ev"><strong>Alliant Group</strong></div><div style="font-size:12px;color:var(--navy);margin-top:1px">Senior Data Analyst II</div><div class="tl-dt">Jul 2021 – Mar 2024</div></div></div>
+            <div class="tl-item"><div class="tl-dot">💼</div><div><div class="tl-ev"><strong>Mordor Intelligence LLP</strong></div><div style="font-size:12px;color:var(--navy);margin-top:1px">Data Analyst I (Nestlé, EY)</div><div class="tl-dt">May 2018 – Feb 2021</div></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-label">Key Achievements</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="padding:9px 11px;background:rgba(45,122,86,.06);border:1px solid rgba(45,122,86,.15);border-radius:8px;font-size:12px;display:flex;gap:7px"><span style="color:var(--green)">★</span>$500K+ pricing wins at LendingTree (8 months)</div>
+            <div style="padding:9px 11px;background:rgba(45,122,86,.06);border:1px solid rgba(45,122,86,.15);border-radius:8px;font-size:12px;display:flex;gap:7px"><span style="color:var(--green)">★</span>18% VMD boost via bidding strategy optimization</div>
+            <div style="padding:9px 11px;background:rgba(45,122,86,.06);border:1px solid rgba(45,122,86,.15);border-radius:8px;font-size:12px;display:flex;gap:7px"><span style="color:var(--green)">★</span>40% reporting turnaround reduction – Power BI + AWS</div>
+            <div style="padding:9px 11px;background:rgba(45,122,86,.06);border:1px solid rgba(45,122,86,.15);border-radius:8px;font-size:12px;display:flex;gap:7px"><span style="color:var(--green)">★</span>40% manual effort saved via Python RPA automation</div>
+            <div style="padding:9px 11px;background:rgba(45,122,86,.06);border:1px solid rgba(45,122,86,.15);border-radius:8px;font-size:12px;display:flex;gap:7px"><span style="color:var(--green)">★</span>15% campaign efficiency lift via BigQuery ML models</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">Technical Skills</div>
+        <div>
+          <span class="skill-pill">SQL</span><span class="skill-pill">Python</span><span class="skill-pill">Tableau</span><span class="skill-pill">Power BI</span><span class="skill-pill">HiveQL</span><span class="skill-pill">BigQuery</span><span class="skill-pill">Snowflake</span><span class="skill-pill">GA4</span><span class="skill-pill">Alteryx</span><span class="skill-pill">Salesforce</span><span class="skill-pill">AWS Glue</span><span class="skill-pill">Apache Spark</span><span class="skill-pill">Data Robot</span><span class="skill-pill">Power Automate</span><span class="skill-pill">Power Apps</span><span class="skill-pill">Adobe Analytics</span><span class="skill-pill">HubSpot</span><span class="skill-pill">Jira</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="add-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Add Application</div>
+      <button class="modal-x" onclick="closeAdd()">×</button>
+    </div>
+    <div class="row"><div style="flex:1"><label class="lbl">Company *</label><input class="inp" id="f-co" placeholder="e.g. JPMorgan Chase"/></div></div>
+    <div class="row"><div style="flex:1"><label class="lbl">Role Title *</label><input class="inp" id="f-title" placeholder="e.g. Analytics Manager"/></div></div>
+    <div class="grid2 mb3">
+      <div><label class="lbl">Location</label><input class="inp" id="f-loc" value="Charlotte, NC"/></div>
+      <div><label class="lbl">Status</label>
+        <select class="inp sel" id="f-status">
+          <option value="applied">Applied</option><option value="screening">Screening</option>
+          <option value="interview">Interview</option><option value="offer">Offer</option><option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid2 mb3">
+      <div><label class="lbl">Source</label>
+        <select class="inp sel" id="f-src">
+          <option>LinkedIn</option><option>Indeed</option><option>Company Site</option><option>Referral</option><option>Recruiter</option><option>Glassdoor</option><option>Other</option>
+        </select>
+      </div>
+      <div><label class="lbl">Date Applied</label><input class="inp" id="f-date" type="date"/></div>
+    </div>
+    <div class="mb3"><label class="lbl">Notes</label><textarea class="inp" id="f-notes" placeholder="Interview dates, contacts, next steps…"></textarea></div>
+    <div class="flex gap3" style="justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeAdd()">Cancel</button>
+      <button class="btn btn-gold" onclick="addJob()">Add Application</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+let pipeline = [
+  {id:1,company:"U.S. Bank",title:"Capital Reporting & Analytics Manager",status:"interview",date:"2026-03-10",location:"Charlotte, NC",source:"LinkedIn",notes:"Phone screen done. Panel interview scheduled Mar 21.",priority:"high"},
+  {id:2,company:"Regions Bank",title:"Compliance Data & Analytics Manager",status:"applied",date:"2026-03-12",location:"Charlotte, NC",source:"LinkedIn",notes:"Applied via LinkedIn. Actively hiring badge.",priority:"high"},
+  {id:3,company:"Bank of America",title:"Fraud Analytics Manager",status:"applied",date:"2026-03-08",location:"Charlotte, NC",source:"Company Site",notes:"Submitted through BofA careers portal.",priority:"medium"},
+  {id:4,company:"Truist",title:"Analytics Manager – AML Transformation",status:"screening",date:"2026-03-05",location:"Charlotte, NC",source:"Indeed",notes:"Recruiter reached out. Awaiting callback.",priority:"medium"},
+  {id:5,company:"LendingTree",title:"Senior Analytics Manager",status:"rejected",date:"2026-02-28",location:"Charlotte, NC",source:"Internal Referral",notes:"Position filled internally.",priority:"low"},
+  {id:6,company:"Wells Fargo",title:"Marketing Analytics Manager",status:"applied",date:"2026-03-14",location:"Charlotte, NC",source:"LinkedIn",notes:"Just applied. Strong match on Tableau + SQL.",priority:"medium"},
+];
+
+const COLS=[
+  {key:"applied",label:"Applied",emoji:"📤"},
+  {key:"screening",label:"Screening",emoji:"📞"},
+  {key:"interview",label:"Interviewing",emoji:"🎯"},
+  {key:"offer",label:"Offer",emoji:"🎉"},
+];
+const BADGE={applied:"b-applied",screening:"b-screening",interview:"b-interview",offer:"b-offer",rejected:"b-rejected"};
+const EMOJI={applied:"📤",screening:"📞",interview:"🎯",offer:"🎉",rejected:"❌"};
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function goto(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active')});
+  if(id==='dashboard')renderDashboard();
+  if(id==='pipeline')renderPipeline();
+  if(id==='gmail')renderActivity();
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const fmtDate=d=>{const dt=new Date(d);return dt.toLocaleDateString("en-US",{month:"short",day:"numeric"})};
+const daysAgo=d=>{const diff=(Date.now()-new Date(d))/86400000;return diff<1?"today":Math.round(diff)===1?"1d ago":`${Math.round(diff)}d ago`};
+const counts=()=>{const c={applied:0,screening:0,interview:0,offer:0,rejected:0};pipeline.forEach(j=>{if(c[j.status]!==undefined)c[j.status]++});return c};
+
+function statsHTML(c){
+  const total=pipeline.length,active=total-c.rejected;
+  return `
+  <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">Total Applications</div><div class="pbar"><div class="pfill" style="width:100%"></div></div></div>
+  <div class="stat"><div class="stat-n c-blue">${active}</div><div class="stat-l">Active in Pipeline</div><div class="stat-s c-blue">↑ ${c.interview} interviewing</div></div>
+  <div class="stat"><div class="stat-n c-amber">${c.screening+c.interview}</div><div class="stat-l">In Progress</div><div class="stat-s c-muted">${c.screening} screening · ${c.interview} interview</div></div>
+  <div class="stat"><div class="stat-n c-green">${c.offer}</div><div class="stat-l">Offers</div><div class="stat-s c-muted">${total>0?Math.round((active/total)*100):0}% response rate</div></div>`;
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+function renderDashboard(){
+  document.getElementById('today-date').textContent="Here's your job search overview for today, "+new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+  const c=counts();
+  document.getElementById('dash-stats').innerHTML=statsHTML(c);
+  const snap=document.getElementById('dash-snapshot');
+  snap.innerHTML=['applied','screening','interview','offer'].map(s=>{
+    const col=COLS.find(x=>x.key===s),cnt=c[s],pct=pipeline.length>0?Math.round((cnt/pipeline.length)*100):0;
+    return `<div style="display:flex;align-items:center;gap:9px;margin-bottom:11px">
+      <div style="width:24px;text-align:center;font-size:13px">${col.emoji}</div>
+      <div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;font-weight:500">${col.label}</span><span style="font-size:12px;color:var(--muted)">${cnt}</span></div>
+      <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div></div></div>`;
+  }).join('');
+  const recent=document.getElementById('dash-recent');
+  recent.innerHTML=[...pipeline].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5).map(j=>`
+    <div class="erow">
+      <div><div class="eco">${j.company}</div><div class="esub">${j.title}</div></div>
+      <span class="badge ${BADGE[j.status]}">${j.status}</span>
+      <div style="font-size:10px;color:var(--muted)">${daysAgo(j.date)}</div>
+    </div>`).join('');
+  updateBadge();
+}
+
+function updateBadge(){
+  const c=counts(),active=pipeline.length-c.rejected;
+  document.getElementById('nb-active').textContent=active;
+}
+
+// ── Pipeline ──────────────────────────────────────────────────────────────────
+function renderPipeline(){
+  const c=counts();
+  document.getElementById('pipe-stats').innerHTML=statsHTML(c);
+  const board=document.getElementById('board');
+  board.innerHTML=COLS.map(col=>{
+    const jobs=pipeline.filter(j=>j.status===col.key);
+    const cards=jobs.length?jobs.map(j=>jobCardHTML(j,col.key)).join(''):`<div style="text-align:center;padding:20px 0;font-size:11px;color:var(--muted)">Empty</div>`;
+    return `<div class="col col-${col.key}">
+      <div class="col-head"><span class="col-name">${col.emoji} ${col.label}</span><span class="col-cnt">${jobs.length}</span></div>
+      ${cards}</div>`;
+  }).join('');
+  const rej=pipeline.filter(j=>j.status==='rejected');
+  const rejSec=document.getElementById('rejected-section');
+  if(rej.length){
+    rejSec.innerHTML=`<div class="card-label" style="font-size:10px;opacity:.6">❌ Rejected / Closed (${rej.length})</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">${rej.map(j=>`<div style="background:rgba(139,149,168,.08);border:1px solid var(--border);border-radius:7px;padding:7px 11px;font-size:11px"><strong style="color:var(--muted)">${j.company}</strong><span style="color:var(--muted);margin-left:5px">${j.title.slice(0,28)}…</span></div>`).join('')}</div>`;
+  } else rejSec.innerHTML='';
+}
+
+function jobCardHTML(j,curStatus){
+  const others=COLS.filter(c=>c.key!==curStatus&&c.key!=='offer').concat(COLS.filter(c=>c.key==='offer'));
+  const actionBtns=others.slice(0,3).map(c=>`<button class="btn btn-outline btn-xs" onclick="changeStatus(${j.id},'${c.key}')">→ ${c.label}</button>`).join('');
+  return `<div class="jcard">
+    <div class="jcard-co">${j.company}</div>
+    <div class="jcard-title">${j.title}</div>
+    <div class="jcard-meta"><span>📍 ${j.location}</span><span style="color:var(--border)">·</span><span>${j.source}</span></div>
+    ${j.notes?`<div class="jcard-note">"${j.notes.slice(0,60)}${j.notes.length>60?'…':''}"</div>`:''}
+    <div class="jcard-date">Applied ${daysAgo(j.date)}</div>
+    <div class="jcard-actions">${actionBtns}<button class="btn btn-xs" style="background:rgba(184,64,64,.1);color:var(--red);border:none;padding:3px 8px;border-radius:5px;font-size:9px;cursor:pointer" onclick="changeStatus(${j.id},'rejected')">✕ Reject</button></div>
+  </div>`;
+}
+
+function changeStatus(id,newStatus){
+  pipeline=pipeline.map(j=>j.id===id?{...j,status:newStatus}:j);
+  renderPipeline();updateBadge();
+}
+
+// ── Add modal ─────────────────────────────────────────────────────────────────
+function openAdd(){
+  document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('add-modal').style.display='flex';
+}
+function closeAdd(){document.getElementById('add-modal').style.display='none'}
+function addJob(){
+  const co=document.getElementById('f-co').value.trim();
+  const ti=document.getElementById('f-title').value.trim();
+  if(!co||!ti){alert('Company and role title are required.');return}
+  pipeline=[{
+    id:Date.now(),company:co,title:ti,
+    status:document.getElementById('f-status').value,
+    location:document.getElementById('f-loc').value,
+    source:document.getElementById('f-src').value,
+    date:document.getElementById('f-date').value||new Date().toISOString().split('T')[0],
+    notes:document.getElementById('f-notes').value,priority:'medium'
+  },...pipeline];
+  ['f-co','f-title','f-notes'].forEach(id=>document.getElementById(id).value='');
+  closeAdd();renderPipeline();updateBadge();
+}
+
+// ── Gmail Scanner ─────────────────────────────────────────────────────────────
+function renderActivity(){
+  const tl=document.getElementById('activity-tl');
+  tl.innerHTML=[...pipeline].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8).map(j=>`
+    <div class="tl-item">
+      <div class="tl-dot">${EMOJI[j.status]||'📤'}</div>
+      <div>
+        <div class="tl-ev"><strong>${j.company}</strong> — ${j.title}</div>
+        <div class="tl-dt">${fmtDate(j.date)} · <span class="badge ${BADGE[j.status]}">${j.status}</span></div>
+        ${j.notes?`<div style="font-size:11px;color:var(--muted);margin-top:2px">${j.notes}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+async function scanGmail(){
+  const btn=document.getElementById('scan-btn'),status=document.getElementById('scan-status'),results=document.getElementById('email-results');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>&nbsp;Scanning…';
+  status.textContent='';results.innerHTML='';
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",max_tokens:1000,
+        system:`You are a job application tracker. Search the user's Gmail for emails related to job applications, interviews, offers, or rejections from the last 60 days. Look for emails from companies, recruiters, LinkedIn, Indeed, Glassdoor, and ATS systems. For each email found, extract: company name, subject, date (YYYY-MM-DD), and classify status as one of: applied/screening/interview/offer/rejected. Return ONLY a JSON array of objects with keys: company, subject, date, status, snippet (short preview). Find up to 15 most recent job-related emails. If you cannot access Gmail or find no emails, return [].`,
+        messages:[{role:"user",content:"Search my Gmail for job application emails. Return JSON array only, no other text."}],
+        mcp_servers:[{type:"url",url:"https://gmail.mcp.claude.com/mcp",name:"gmail-mcp"}]
+      })
+    });
+    const data=await res.json();
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    let emails=[];
+    try{emails=JSON.parse(text.replace(/```json|```/g,'').trim().match(/\[[\s\S]*\]/)?.[0]||'[]')}catch{}
+    if(!Array.isArray(emails))emails=[];
+    if(emails.length===0){
+      status.innerHTML='<span style="color:var(--muted)">No job emails found, or Gmail not connected.</span>';
+      results.innerHTML='<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">Make sure Gmail is connected in Claude Settings → Connectors, then try again.</div></div>';
+    } else {
+      status.innerHTML=`<span style="color:var(--green)"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:5px"></span>Found ${emails.length} job-related emails</span>`;
+      results.innerHTML=emails.map((e,i)=>`
+        <div class="erow">
+          <div><div class="eco">${e.company||'Unknown'}</div><div class="esub">${e.subject||''}</div>${e.snippet?`<div style="font-size:10px;color:var(--muted);margin-top:2px;font-style:italic">"${String(e.snippet).slice(0,80)}…"</div>`:''}</div>
+          <div><span class="badge ${BADGE[e.status]||'b-applied'}">${e.status||'applied'}</span><div style="font-size:10px;color:var(--muted);text-align:right;margin-top:3px">${e.date?fmtDate(e.date):''}</div></div>
+          <button class="btn btn-outline btn-sm" onclick='importEmail(${JSON.stringify(e).replace(/'/g,"&#39;")})'>+ Pipeline</button>
+        </div>`).join('');
+    }
+  }catch(err){
+    status.innerHTML='<span style="color:var(--red)">Connection failed. Check Gmail connector in Claude Settings.</span>';
+    results.innerHTML='';
+  }
+  btn.disabled=false;btn.innerHTML='📧 Scan Gmail Now';
+}
+
+function importEmail(e){
+  const already=pipeline.some(j=>j.company.toLowerCase()===(e.company||'').toLowerCase());
+  if(already){alert(`${e.company} is already in your pipeline.`);return}
+  pipeline=[{id:Date.now(),company:e.company||'Unknown',title:e.subject||'Job Application',status:e.status||'applied',date:e.date||new Date().toISOString().split('T')[0],location:'Charlotte, NC',source:'Gmail',notes:e.snippet||'',priority:'medium'},...pipeline];
+  alert(`✓ ${e.company} added to pipeline!`);
+  updateBadge();renderActivity();
+}
+
+// ── Job Search ────────────────────────────────────────────────────────────────
+function quickSearch(q){document.getElementById('search-q').value=q;doSearch();}
+
+async function doSearch(){
+  const q=document.getElementById('search-q').value.trim();
+  if(!q)return;
+  const btn=document.getElementById('search-btn'),results=document.getElementById('search-results');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  results.innerHTML='<div class="loading-center"><div class="spin"></div><p>Searching live job boards…</p></div>';
+  await callJobSearch(q,results);
+  btn.disabled=false;btn.innerHTML='🔍 Search';
+}
+
+async function linkedinSearch(q){
+  const results=document.getElementById('li-results');
+  results.innerHTML='<div class="loading-center"><div class="spin"></div><p>Fetching live listings…</p></div>';
+  await callJobSearch(q,results);
+}
+
+async function callJobSearch(q,container){
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",max_tokens:1000,
+        system:`You are a job search assistant for Kavya Patnala, a Senior Data/Business Analyst in Charlotte NC targeting Analytics Manager roles in FinTech/Banking, salary $140K-$160K, hybrid work preferred. Her skills include SQL, Tableau, Python, Power BI, HiveQL, BigQuery, Snowflake, GA4, and she has 9 years of experience. Search for relevant current job postings. Return ONLY a JSON array (no other text, no markdown) with up to 6 jobs. Each object must have: title (string), company (string), location (string), type (hybrid/remote/onsite), description (2 sentences max), tags (array of 3-4 skill keywords), match (high/medium/low based on Kavya's background). Prioritize Charlotte NC area and FinTech/Banking roles.`,
+        messages:[{role:"user",content:`Find jobs for: ${q}. Return JSON array only.`}],
+        tools:[{type:"web_search_20250305",name:"web_search"}]
+      })
+    });
+    const data=await res.json();
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    let jobs=[];
+    try{jobs=JSON.parse(text.replace(/```json|```/g,'').trim().match(/\[[\s\S]*\]/)?.[0]||'[]')}catch{}
+    if(!Array.isArray(jobs)||jobs.length===0){
+      container.innerHTML='<div class="empty card"><div class="empty-icon">🔍</div><div class="empty-text">No results found. Try a different search.</div></div>';
+      return;
+    }
+    const MC={high:'match-high',medium:'match-medium',low:'match-low'};
+    container.innerHTML=jobs.map(j=>`
+      <div class="jresult">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><div class="jres-title">${j.title||''}</div><div class="jres-co">${j.company||''}</div></div>
+          <div style="text-align:right;display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+            ${j.match?`<span class="badge ${MC[j.match]||''}">${j.match} match</span>`:''}
+            <span style="font-size:10px;color:var(--muted)">${j.location||''} · ${j.type||''}</span>
+          </div>
+        </div>
+        ${j.description?`<div class="jres-desc">${j.description}</div>`:''}
+        <div class="tags">${(j.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      </div>`).join('');
+  }catch(err){
+    container.innerHTML='<div class="err">Search failed. Please try again.</div>';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  renderDashboard();
+  document.getElementById('add-modal').addEventListener('click',function(e){if(e.target===this)closeAdd()});
+});
+</script>
+</body>
+</html>
